@@ -144,6 +144,8 @@ private:
         case WM_COMMAND:
             if (LOWORD(wParam) == IDC_NEXT) {
                 SelectAndCopyNext();
+            } else if (LOWORD(wParam) == IDC_TEXT && HIWORD(wParam) == EN_CHANGE) {
+                nLineId = 0;
             }
             break;
 
@@ -161,7 +163,20 @@ private:
     }
 
     void SelectAndCopyNext() {
+        WCHAR szText[4096];
 
+        *(LPWORD)szText = RTL_NUMBER_OF(szText);
+        if (0 != SendDlgItemMessageW(m_hwndDlg, IDC_TEXT, EM_GETLINE, nLineId, (LPARAM)szText)) {
+            int nBegin = SendDlgItemMessageW(m_hwndDlg, IDC_TEXT, EM_LINEINDEX, nLineId, 0);
+            int nEnd = SendDlgItemMessageW(m_hwndDlg, IDC_TEXT, EM_LINEINDEX, nLineId + 1, 0);
+
+            if (nBegin >= 0) {
+                SendDlgItemMessageW(m_hwndDlg, IDC_TEXT, EM_SETSEL, nBegin, nEnd);
+                SendDlgItemMessageW(m_hwndDlg, IDC_TEXT, EM_SCROLLCARET, 0, 0);
+            }
+        }
+
+        nLineId += 1;
     }
 
     void OnInitDialog()
@@ -181,6 +196,7 @@ private:
     LPCTSTR m_lpTemplate;
 
     HHOOK m_hHook = NULL;
+    int nLineId = 0;
 };
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nShowCmd)
