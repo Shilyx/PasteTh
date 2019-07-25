@@ -174,6 +174,12 @@ private:
                 SendDlgItemMessageW(m_hwndDlg, IDC_TEXT, EM_SETSEL, nBegin, nEnd);
                 SendDlgItemMessageW(m_hwndDlg, IDC_TEXT, EM_SCROLLCARET, 0, 0);
             }
+
+            CloseHandle(CreateThread(NULL, 0, [](LPVOID lpParam) -> DWORD {
+                Sleep(1111);
+                PostMessageW((HWND)lpParam, WM_COPY, 0, 0);
+                return 0;
+            }, GetDlgItem(m_hwndDlg, IDC_TEXT), 0, NULL));
         }
 
         nLineId += 1;
